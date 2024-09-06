@@ -1,6 +1,5 @@
 import socket
 import threading
-import base64
 
 # Escolha da cifra de criptografia pelo usuário
 print("Escolha a cifra de criptografia: ")
@@ -17,7 +16,7 @@ chave = input("Digite a chave para a cifra escolhida: ")
 # Função que implementa a Cifra de César
 def cifra_de_cesar(mensagem, chave, criptografar=True):
     resultado = ''
-    deslocamento = int(chave) if criptografar else -int(chave)
+    deslocamento = chave if criptografar else -chave
     for caractere in mensagem:
         if caractere.isalpha():
             base = ord('A') if caractere.isupper() else ord('a')
@@ -28,20 +27,23 @@ def cifra_de_cesar(mensagem, chave, criptografar=True):
 
 # Função que implementa a Substituição Monoalfabética
 def cifra_monoalfabetica(mensagem, chave, criptografar=True):
-    alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    alfabeto_substituido = 'QWERTYUIOPLKJHGFDSAZXCVBNM'
+    alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'  # Alfabeto original
+    alfabeto_substituido = 'QWERTYUIOPLKJHGFDSAZXCVBNM'  # Alfabeto substituído
     
-    chave = chave.upper()
+    chave = chave.upper()  # Converte a chave para maiúsculas
     
     if criptografar:
+        # Cria um mapa de substituição usando o alfabeto original e substituído
         mapa_chave = {alfabeto[i]: alfabeto_substituido[i] for i in range(26)}
     else:
+        # Cria um mapa de substituição invertido para descriptografar
         mapa_chave = {alfabeto_substituido[i]: alfabeto[i] for i in range(26)}
 
-    resultado = ''
-    for caractere in mensagem.upper():
-        resultado += mapa_chave.get(caractere, caractere)
-    return resultado
+    resultado = ''  # Inicializa a string para armazenar o resultado
+    for caractere in mensagem.upper():  # Converte a mensagem para maiúsculas e itera sobre cada caractere
+        resultado += mapa_chave.get(caractere, caractere)  # Substitui o caractere ou mantém o original
+    return resultado  # Retorna a mensagem criptografada ou descriptografada
+
 
 # Função que implementa a Cifra de Playfair
 def cifra_de_playfair(mensagem, chave, criptografar=True):
@@ -101,66 +103,46 @@ def cifra_de_playfair(mensagem, chave, criptografar=True):
 
 # Função que implementa a Cifra de Vigenère
 def cifra_de_vigenere(mensagem, chave, criptografar=True):
-    texto_criptografado = ""
-    chave = chave.upper()
-    tamanho_chave = len(chave)
+    resultado = ''
+    chave = chave.lower()
+    indice_chave = 0
     
-    # Repetir a chave para que seu tamanho seja igual ao do texto
-    chave_repetida = (chave * (len(mensagem) // tamanho_chave + 1))[:len(mensagem)]
-
-    for i in range(len(mensagem)):
-        caractere = mensagem[i]
+    for caractere in mensagem:
         if caractere.isalpha():
-            caractere_chave = chave_repetida[i]
-            deslocamento_chave = ord(caractere_chave) - ord('A')
-
-            if criptografar:
-                if caractere.isupper():
-                    texto_criptografado += chr((ord(caractere) - ord('A') + deslocamento_chave) % 26 + ord('A'))
-                else:
-                    texto_criptografado += chr((ord(caractere) - ord('a') + deslocamento_chave) % 26 + ord('a'))
-            else:
-                if caractere.isupper():
-                    texto_criptografado += chr((ord(caractere) - ord('A') - deslocamento_chave) % 26 + ord('A'))
-                else:
-                    texto_criptografado += chr((ord(caractere) - ord('a') - deslocamento_chave) % 26 + ord('a'))
+            deslocamento = ord(chave[indice_chave]) - ord('a')
+            deslocamento = deslocamento if criptografar else -deslocamento
+            base = ord('A') if caractere.isupper() else ord('a')
+            resultado += chr((ord(caractere) - base + deslocamento) % 26 + base)
+            indice_chave = (indice_chave + 1) % len(chave)
         else:
-            texto_criptografado += caractere
+            resultado += caractere
+    return resultado
 
-    return texto_criptografado
-
-# Função que implementa o RC4
-def rc4(mensagem, chave):
-    def ksa(key):
-        key_length = len(key)
-        S = list(range(256))
-        j = 0
-        for i in range(256):
-            j = (j + S[i] + key[i % key_length]) % 256
-            S[i], S[j] = S[j], S[i]
-        return S
-
-    def prga(S, texto):
-        i = 0
-        j = 0
-        resultado = []
-        for caractere in texto:
-            i = (i + 1) % 256
-            j = (j + S[i]) % 256
-            S[i], S[j] = S[j], S[i]
-            K = S[(S[i] + S[j]) % 256]
-            resultado.append(chr(ord(caractere) ^ K))
-        return ''.join(resultado)
-
-    chave = [ord(c) for c in chave]  # Convertendo a chave para uma lista de inteiros
-    S = ksa(chave)
-    return prga(S, mensagem)
-
+# Função RC4
+def rc4(key, text):
+    S = list(range(256))
+    j = 0
+    key_length = len(key)
+    
+    for i in range(256):
+        j = (j + S[i] + key[i % key_length]) % 256
+        S[i], S[j] = S[j], S[i]
+    
+    i = j = 0
+    result = []
+    for char in text:
+        i = (i + 1) % 256
+        j = (j + S[i]) % 256
+        S[i], S[j] = S[j], S[i]
+        K = S[(S[i] + S[j]) % 256]
+        result.append(chr(ord(char) ^ K))
+    
+    return ''.join(result)
 
 # Função que aplica a cifra escolhida na mensagem
-def criptografar_mensagem(mensagem):
+def criptografar_mensagem(mensagem, escolha, chave):
     if escolha == '1':
-        return cifra_de_cesar(mensagem, chave)  # Chave já é um número inteiro agora
+        return cifra_de_cesar(mensagem, int(chave))
     elif escolha == '2':
         return cifra_monoalfabetica(mensagem, chave)
     elif escolha == '3':
@@ -168,7 +150,8 @@ def criptografar_mensagem(mensagem):
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
     elif escolha == '5':
-        return rc4(mensagem, chave)
+        chave_bytes = [ord(c) for c in chave]
+        return rc4(chave_bytes, mensagem)
     else:
         return mensagem
 
@@ -176,8 +159,14 @@ def criptografar_mensagem(mensagem):
 def receber_mensagens():
     while True:
         try:
-            mensagem = cliente.recv(1024).decode('utf-8')
-            print(mensagem)
+            mensagem = cliente.recv(1024).decode('ascii')
+            if escolha == '5':  # RC4
+                # Exibindo as informações detalhadas apenas se a cifra for RC4
+                print(f"Texto Plano: {mensagem}")
+                mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
+                print(f"Texto Criptografado: {mensagem_criptografada}")
+                print(f"Chave: {chave}")
+                print(f"Chave ASCII: {[ord(c) for c in chave]}")
         except:
             print("Ocorreu um erro!")
             cliente.close()
@@ -187,8 +176,11 @@ def receber_mensagens():
 def enviar_mensagens():
     while True:
         mensagem = '{}: {}'.format(apelido, input(''))
-        mensagem_criptografada = criptografar_mensagem(mensagem)
-        cliente.send(mensagem_criptografada.encode('utf-8'))
+        mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
+        if escolha == '5':  # RC4
+            print(f"Texto Criptografado a ser enviado: {mensagem_criptografada}")
+        cliente.send(mensagem_criptografada.encode('ascii'))
+
 # Conectando ao servidor
 apelido = input("Escolha seu apelido: ")
 cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

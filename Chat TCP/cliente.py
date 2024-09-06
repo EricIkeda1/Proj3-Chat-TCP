@@ -7,6 +7,7 @@ print("1. Cifra de César")
 print("2. Substituição Monoalfabética")
 print("3. Cifra de Playfair")
 print("4. Cifra de Vigenère")
+print("5. RC4")
 escolha = input("Digite o número da cifra desejada: ")
 
 # Solicitação da chave de criptografia
@@ -26,23 +27,20 @@ def cifra_de_cesar(mensagem, chave, criptografar=True):
 
 # Função que implementa a Substituição Monoalfabética
 def cifra_monoalfabetica(mensagem, chave, criptografar=True):
-    alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'  # Alfabeto original
-    alfabeto_substituido = 'QWERTYUIOPLKJHGFDSAZXCVBNM'  # Alfabeto substituído
+    alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    alfabeto_substituido = 'QWERTYUIOPLKJHGFDSAZXCVBNM'
     
-    chave = chave.upper()  # Converte a chave para maiúsculas
+    chave = chave.upper()
     
     if criptografar:
-        # Cria um mapa de substituição usando o alfabeto original e substituído
         mapa_chave = {alfabeto[i]: alfabeto_substituido[i] for i in range(26)}
     else:
-        # Cria um mapa de substituição invertido para descriptografar
         mapa_chave = {alfabeto_substituido[i]: alfabeto[i] for i in range(26)}
 
-    resultado = ''  # Inicializa a string para armazenar o resultado
-    for caractere in mensagem.upper():  # Converte a mensagem para maiúsculas e itera sobre cada caractere
-        resultado += mapa_chave.get(caractere, caractere)  # Substitui o caractere ou mantém o original
-    return resultado  # Retorna a mensagem criptografada ou descriptografada
-
+    resultado = ''
+    for caractere in mensagem.upper():
+        resultado += mapa_chave.get(caractere, caractere)
+    return resultado
 
 # Função que implementa a Cifra de Playfair
 def cifra_de_playfair(mensagem, chave, criptografar=True):
@@ -117,6 +115,26 @@ def cifra_de_vigenere(mensagem, chave, criptografar=True):
             resultado += caractere
     return resultado
 
+# Função que implementa o RC4
+def rc4(mensagem, chave):
+    S = list(range(256))
+    T = [ord(chave[i % len(chave)]) for i in range(256)]
+    j = 0
+    for i in range(256):
+        j = (j + S[i] + T[i]) % 256
+        S[i], S[j] = S[j], S[i]
+
+    i = j = 0
+    resultado = ''
+    for caractere in mensagem:
+        i = (i + 1) % 256
+        j = (j + S[i]) % 256
+        S[i], S[j] = S[j], S[i]
+        k = S[(S[i] + S[j]) % 256]
+        resultado += chr(ord(caractere) ^ k)
+    
+    return resultado
+
 # Função que aplica a cifra escolhida na mensagem
 def criptografar_mensagem(mensagem):
     if escolha == '1':
@@ -127,6 +145,8 @@ def criptografar_mensagem(mensagem):
         return cifra_de_playfair(mensagem, chave)
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
+    elif escolha == '5':
+        return rc4(mensagem, chave)  # RC4
     else:
         return mensagem
 

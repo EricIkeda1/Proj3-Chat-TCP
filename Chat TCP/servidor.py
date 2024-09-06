@@ -46,9 +46,9 @@ def gerenciar_cliente(cliente):
             mensagem = cliente.recv(1024).decode('ascii')
             print(f"[Mensagem recebida]: {mensagem}")
             
-            # Exemplo de criptografia e descriptografia com Cifra de César
-            chave = '3'  # A chave precisa ser compartilhada entre o cliente e o servidor
-            mensagem_descriptografada = cifra_de_cesar(mensagem, chave, criptografar=False)
+            # Exemplo de criptografia e descriptografia com Cifra de Vigenère
+            chave = 'FOGO'  # A chave precisa ser compartilhada entre o cliente e o servidor
+            mensagem_descriptografada = cifra_de_vigenere(mensagem, chave, criptografar=False)
             print(f"[Mensagem descriptografada]: {mensagem_descriptografada}")
 
             transmitir_mensagem(mensagem, cliente)
@@ -56,6 +56,7 @@ def gerenciar_cliente(cliente):
             clientes.remove(cliente)
             cliente.close()
             break
+
 
 # Função que transmite mensagens para todos os clientes
 def transmitir_mensagem(mensagem, cliente):

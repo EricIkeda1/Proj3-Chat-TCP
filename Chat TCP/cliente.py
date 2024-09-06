@@ -16,7 +16,7 @@ chave = input("Digite a chave para a cifra escolhida: ")
 # Função que implementa a Cifra de César
 def cifra_de_cesar(mensagem, chave, criptografar=True):
     resultado = ''
-    deslocamento = chave if criptografar else -chave
+    deslocamento = int(chave) if criptografar else -int(chave)
     for caractere in mensagem:
         if caractere.isalpha():
             base = ord('A') if caractere.isupper() else ord('a')
@@ -100,45 +100,65 @@ def cifra_de_playfair(mensagem, chave, criptografar=True):
 
 # Função que implementa a Cifra de Vigenère
 def cifra_de_vigenere(mensagem, chave, criptografar=True):
-    resultado = ''
-    chave = chave.lower()
-    indice_chave = 0
+    texto_criptografado = ""
+    chave = chave.upper()
+    tamanho_chave = len(chave)
     
-    for caractere in mensagem:
+    # Repetir a chave para que seu tamanho seja igual ao do texto
+    chave_repetida = (chave * (len(mensagem) // tamanho_chave + 1))[:len(mensagem)]
+
+    for i in range(len(mensagem)):
+        caractere = mensagem[i]
         if caractere.isalpha():
-            deslocamento = ord(chave[indice_chave]) - ord('a')
-            deslocamento = deslocamento if criptografar else -deslocamento
-            base = ord('A') if caractere.isupper() else ord('a')
-            resultado += chr((ord(caractere) - base + deslocamento) % 26 + base)
-            indice_chave = (indice_chave + 1) % len(chave)
+            caractere_chave = chave_repetida[i]
+            deslocamento_chave = ord(caractere_chave) - ord('A')
+
+            if criptografar:
+                if caractere.isupper():
+                    texto_criptografado += chr((ord(caractere) - ord('A') + deslocamento_chave) % 26 + ord('A'))
+                else:
+                    texto_criptografado += chr((ord(caractere) - ord('a') + deslocamento_chave) % 26 + ord('a'))
+            else:
+                if caractere.isupper():
+                    texto_criptografado += chr((ord(caractere) - ord('A') - deslocamento_chave) % 26 + ord('A'))
+                else:
+                    texto_criptografado += chr((ord(caractere) - ord('a') - deslocamento_chave) % 26 + ord('a'))
         else:
-            resultado += caractere
-    return resultado
+            texto_criptografado += caractere
+
+    return texto_criptografado
 
 # Função que implementa o RC4
 def rc4(mensagem, chave):
-    S = list(range(256))
-    T = [ord(chave[i % len(chave)]) for i in range(256)]
-    j = 0
-    for i in range(256):
-        j = (j + S[i] + T[i]) % 256
-        S[i], S[j] = S[j], S[i]
+    def ksa(chave):
+        S = list(range(256))
+        j = 0
+        for i in range(256):
+            j = (j + S[i] + chave[i % len(chave)]) % 256
+            S[i], S[j] = S[j], S[i]
+        return S
 
-    i = j = 0
-    resultado = ''
-    for caractere in mensagem:
-        i = (i + 1) % 256
-        j = (j + S[i]) % 256
-        S[i], S[j] = S[j], S[i]
-        k = S[(S[i] + S[j]) % 256]
-        resultado += chr(ord(caractere) ^ k)
-    
-    return resultado
+    def prga(S, texto):
+        i = 0
+        j = 0
+        resultado = []
+        for caractere in texto:
+            i = (i + 1) % 256
+            j = (j + S[i]) % 256
+            S[i], S[j] = S[j], S[i]
+            t = (S[i] + S[j]) % 256
+            resultado.append(chr(ord(caractere) ^ S[t]))
+        return ''.join(resultado)
+
+    chave = [ord(c) for c in chave]
+    S = ksa(chave)
+    return prga(S, mensagem)
+
 
 # Função que aplica a cifra escolhida na mensagem
 def criptografar_mensagem(mensagem):
     if escolha == '1':
-        return cifra_de_cesar(mensagem, int(chave))
+        return cifra_de_cesar(mensagem, chave)  # Chave já é um número inteiro agora
     elif escolha == '2':
         return cifra_monoalfabetica(mensagem, chave)
     elif escolha == '3':
@@ -146,7 +166,7 @@ def criptografar_mensagem(mensagem):
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
     elif escolha == '5':
-        return rc4(mensagem, chave)  # RC4
+        return rc4(mensagem, chave)
     else:
         return mensagem
 
@@ -154,7 +174,7 @@ def criptografar_mensagem(mensagem):
 def receber_mensagens():
     while True:
         try:
-            mensagem = cliente.recv(1024).decode('ascii')
+            mensagem = cliente.recv(1024).decode('utf-8')
             print(mensagem)
         except:
             print("Ocorreu um erro!")

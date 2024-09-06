@@ -4,7 +4,7 @@ import threading
 # Função que implementa a Cifra de César
 def cifra_de_cesar(mensagem, chave, criptografar=True):
     resultado = ''
-    deslocamento = chave if criptografar else -chave
+    deslocamento = int(chave) if criptografar else -int(chave)
     for caractere in mensagem:
         if caractere.isalpha():
             base = ord('A') if caractere.isupper() else ord('a')
@@ -15,23 +15,29 @@ def cifra_de_cesar(mensagem, chave, criptografar=True):
 
 # Função que implementa o RC4
 def rc4(mensagem, chave):
-    S = list(range(256))
-    T = [ord(chave[i % len(chave)]) for i in range(256)]
-    j = 0
-    for i in range(256):
-        j = (j + S[i] + T[i]) % 256
-        S[i], S[j] = S[j], S[i]
+    def ksa(chave):
+        S = list(range(256))
+        j = 0
+        for i in range(256):
+            j = (j + S[i] + chave[i % len(chave)]) % 256
+            S[i], S[j] = S[j], S[i]
+        return S
 
-    i = j = 0
-    resultado = ''
-    for caractere in mensagem:
-        i = (i + 1) % 256
-        j = (j + S[i]) % 256
-        S[i], S[j] = S[j], S[i]
-        k = S[(S[i] + S[j]) % 256]
-        resultado += chr(ord(caractere) ^ k)
-    
-    return resultado
+    def prga(S, texto):
+        i = 0
+        j = 0
+        resultado = []
+        for caractere in texto:
+            i = (i + 1) % 256
+            j = (j + S[i]) % 256
+            S[i], S[j] = S[j], S[i]
+            t = (S[i] + S[j]) % 256
+            resultado.append(chr(ord(caractere) ^ S[t]))
+        return ''.join(resultado)
+
+    chave = [ord(c) for c in chave]
+    S = ksa(chave)
+    return prga(S, mensagem)
 
 # Função que gerencia as mensagens recebidas dos clientes
 def gerenciar_cliente(cliente):
@@ -40,9 +46,9 @@ def gerenciar_cliente(cliente):
             mensagem = cliente.recv(1024).decode('ascii')
             print(f"[Mensagem recebida]: {mensagem}")
             
-            # Exemplo de criptografia e descriptografia com RC4
-            chave = 'minha_chave'  # A chave precisa ser compartilhada entre o cliente e o servidor
-            mensagem_descriptografada = rc4(mensagem, chave)
+            # Exemplo de criptografia e descriptografia com Cifra de César
+            chave = '3'  # A chave precisa ser compartilhada entre o cliente e o servidor
+            mensagem_descriptografada = cifra_de_cesar(mensagem, chave, criptografar=False)
             print(f"[Mensagem descriptografada]: {mensagem_descriptografada}")
 
             transmitir_mensagem(mensagem, cliente)

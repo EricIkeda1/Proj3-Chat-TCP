@@ -14,36 +14,37 @@ def cifra_de_cesar(mensagem, chave, criptografar=True):
     return resultado
 
 # Função que implementa o RC4
-def rc4(mensagem, chave):
-    def ksa(chave):
+def rc4(key, plaintext):
+    def ksa(key):
+        key_length = len(key)
         S = list(range(256))
         j = 0
         for i in range(256):
-            j = (j + S[i] + chave[i % len(chave)]) % 256
+            j = (j + S[i] + key[i % key_length]) % 256
             S[i], S[j] = S[j], S[i]
         return S
 
     def prga(S, texto):
         i = 0
         j = 0
-        resultado = []
+        output = []
         for caractere in texto:
             i = (i + 1) % 256
             j = (j + S[i]) % 256
             S[i], S[j] = S[j], S[i]
-            t = (S[i] + S[j]) % 256
-            resultado.append(chr(ord(caractere) ^ S[t]))
-        return ''.join(resultado)
+            K = S[(S[i] + S[j]) % 256]
+            output.append(chr(ord(caractere) ^ K))
+        return ''.join(output)
 
-    chave = [ord(c) for c in chave]
-    S = ksa(chave)
-    return prga(S, mensagem)
+    key = [ord(c) for c in key]  # Convertendo a chave para uma lista de inteiros
+    S = ksa(key)
+    return prga(S, plaintext)
 
 # Função que gerencia as mensagens recebidas dos clientes
 def gerenciar_cliente(cliente):
     while True:
         try:
-            mensagem = cliente.recv(1024).decode('ascii')
+            mensagem = cliente.recv(1024).decode('utf-8')
             print(f"[Mensagem recebida]: {mensagem}")
             
             # Exemplo de criptografia e descriptografia com Cifra de Vigenère
@@ -56,7 +57,6 @@ def gerenciar_cliente(cliente):
             clientes.remove(cliente)
             cliente.close()
             break
-
 
 # Função que transmite mensagens para todos os clientes
 def transmitir_mensagem(mensagem, cliente):

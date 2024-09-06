@@ -1,5 +1,6 @@
 import socket
 import threading
+import base64
 
 # Escolha da cifra de criptografia pelo usuário
 print("Escolha a cifra de criptografia: ")
@@ -130,11 +131,12 @@ def cifra_de_vigenere(mensagem, chave, criptografar=True):
 
 # Função que implementa o RC4
 def rc4(mensagem, chave):
-    def ksa(chave):
+    def ksa(key):
+        key_length = len(key)
         S = list(range(256))
         j = 0
         for i in range(256):
-            j = (j + S[i] + chave[i % len(chave)]) % 256
+            j = (j + S[i] + key[i % key_length]) % 256
             S[i], S[j] = S[j], S[i]
         return S
 
@@ -146,11 +148,11 @@ def rc4(mensagem, chave):
             i = (i + 1) % 256
             j = (j + S[i]) % 256
             S[i], S[j] = S[j], S[i]
-            t = (S[i] + S[j]) % 256
-            resultado.append(chr(ord(caractere) ^ S[t]))
+            K = S[(S[i] + S[j]) % 256]
+            resultado.append(chr(ord(caractere) ^ K))
         return ''.join(resultado)
 
-    chave = [ord(c) for c in chave]
+    chave = [ord(c) for c in chave]  # Convertendo a chave para uma lista de inteiros
     S = ksa(chave)
     return prga(S, mensagem)
 
@@ -186,8 +188,7 @@ def enviar_mensagens():
     while True:
         mensagem = '{}: {}'.format(apelido, input(''))
         mensagem_criptografada = criptografar_mensagem(mensagem)
-        cliente.send(mensagem_criptografada.encode('ascii'))
-
+        cliente.send(mensagem_criptografada.encode('utf-8'))
 # Conectando ao servidor
 apelido = input("Escolha seu apelido: ")
 cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

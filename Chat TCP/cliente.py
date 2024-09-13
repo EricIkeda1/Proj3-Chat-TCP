@@ -162,10 +162,13 @@ def receber_mensagens():
             mensagem = cliente.recv(1024).decode('ascii')
             if escolha == '5':  # RC4
                 print(f"Texto Plano: {chave}")
+                print(f"Texto Plano ASCII: {[ord(c) for c in chave]}")
                 mensagem_criptografada = criptografar_mensagem(chave, escolha, chave)
                 print(f"Texto Criptografado: {mensagem_criptografada}")
                 print(f"Chave: {chave}")
                 print(f"Chave ASCII: {[ord(c) for c in chave]}")
+            else:
+                print(mensagem)
         except:
             print("Ocorreu um erro!")
             cliente.close()

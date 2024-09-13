@@ -124,14 +124,12 @@ def rc4(key, text):
     j = 0
     key_length = len(key)
     
-    # Inicializa o vetor S usando a chave
     for i in range(256):
-        j = (j + S[i] + ord(key[i % key_length])) % 256
+        j = (j + S[i] + key[i % key_length]) % 256
         S[i], S[j] = S[j], S[i]
     
     i = j = 0
     result = []
-    # Geração do fluxo de chave e criptografia
     for char in text:
         i = (i + 1) % 256
         j = (j + S[i]) % 256
@@ -152,7 +150,8 @@ def criptografar_mensagem(mensagem, escolha, chave):
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
     elif escolha == '5':
-        return rc4(chave, mensagem)
+        chave_bytes = [ord(c) for c in chave]
+        return rc4(chave_bytes, mensagem)
     else:
         return mensagem
 
@@ -171,7 +170,7 @@ def receber_mensagens():
             print("Ocorreu um erro!")
             cliente.close()
             break
-
+        
 # Função que envia mensagens para o servidor
 def enviar_mensagens():
     while True:

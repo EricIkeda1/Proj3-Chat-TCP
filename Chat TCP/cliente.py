@@ -10,6 +10,9 @@ print("4. Cifra de Vigenère")
 print("5. RC4")
 escolha = input("Digite o número da cifra desejada: ")
 
+# Solicitação do texto plano
+texto_plano = input("Digite o texto plano: ")
+
 # Solicitação da chave de criptografia
 chave = input("Digite a chave para a cifra escolhida: ")
 
@@ -141,6 +144,15 @@ def rc4(key, text):
 
 # Função que aplica a cifra escolhida na mensagem
 def criptografar_mensagem(mensagem, escolha, chave):
+    if escolha == '5':  # RC4
+        chave_bytes = chave  # Para RC4, a chave deve ser uma string de bytes
+        return rc4(chave_bytes, mensagem)
+    else:
+        # Outras cifras podem ser implementadas aqui
+        return mensagem
+
+# Função que aplica a cifra escolhida na mensagem
+def criptografar_mensagem(mensagem, escolha, chave):
     if escolha == '1':
         return cifra_de_cesar(mensagem, int(chave))
     elif escolha == '2':
@@ -149,9 +161,6 @@ def criptografar_mensagem(mensagem, escolha, chave):
         return cifra_de_playfair(mensagem, chave)
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
-    elif escolha == '5':
-        chave_bytes = [ord(c) for c in chave]
-        return rc4(chave_bytes, mensagem)
     else:
         return mensagem
 
@@ -161,12 +170,14 @@ def receber_mensagens():
         try:
             mensagem = cliente.recv(1024).decode('ascii')
             if escolha == '5':  # RC4
-                print(f"Texto Plano: {chave}")
-                print(f"Texto Plano ASCII: {[ord(c) for c in chave]}")
-                mensagem_criptografada = criptografar_mensagem(chave, escolha, chave)
-                print(f"Texto Criptografado: {mensagem_criptografada}")
+                print(f"Texto Plano: {texto_plano}")
+                texto_plano_ascii = [ord(c) for c in texto_plano]
+                print(f"Texto Plano ASCII: {texto_plano_ascii}")
+                mensagem_criptografada = criptografar_mensagem(texto_plano, escolha, chave)
+                print(f"Texto Criptografado: {[ord(c) for c in mensagem_criptografada]}")
                 print(f"Chave: {chave}")
-                print(f"Chave ASCII: {[ord(c) for c in chave]}")
+                chave_ascii = [ord(c) for c in chave]
+                print(f"Chave ASCII: {chave_ascii}")
             else:
                 print(mensagem)
         except:
@@ -180,8 +191,8 @@ def enviar_mensagens():
         mensagem = '{}: {}'.format(apelido, input(''))
         mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
         if escolha == '5':  # RC4
-            print(f"Texto Criptografado a ser enviado: {mensagem_criptografada}")
-        cliente.send(mensagem_criptografada.encode('ascii'))
+            print(f"Texto Criptografado a ser enviado: {[ord(c) for c in mensagem_criptografada]}")
+        cliente.send(''.join(mensagem_criptografada).encode('ascii'))
 
 # Conectando ao servidor
 apelido = input("Escolha seu apelido: ")

@@ -18,21 +18,23 @@ def rc4(key, text):
     S = list(range(256))
     j = 0
     key_length = len(key)
-    
+
+    # Inicialização do vetor S usando a chave
     for i in range(256):
-        j = (j + S[i] + key[i % key_length]) % 256
+        j = (j + S[i] + ord(key[i % key_length])) % 256
         S[i], S[j] = S[j], S[i]
-    
+
     i = j = 0
     result = []
+    # Geração do fluxo de chave e criptografia
     for char in text:
         i = (i + 1) % 256
         j = (j + S[i]) % 256
         S[i], S[j] = S[j], S[i]
         K = S[(S[i] + S[j]) % 256]
-        result.append(chr(ord(char) ^ K))
-    
-    return ''.join(result)
+        result.append(K ^ ord(char))
+
+    return result 
 
 # Função que gerencia as mensagens recebidas dos clientes
 def gerenciar_cliente(cliente):

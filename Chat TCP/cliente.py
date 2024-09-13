@@ -124,12 +124,14 @@ def rc4(key, text):
     j = 0
     key_length = len(key)
     
+    # Inicializa o vetor S usando a chave
     for i in range(256):
-        j = (j + S[i] + key[i % key_length]) % 256
+        j = (j + S[i] + ord(key[i % key_length])) % 256
         S[i], S[j] = S[j], S[i]
     
     i = j = 0
     result = []
+    # Geração do fluxo de chave e criptografia
     for char in text:
         i = (i + 1) % 256
         j = (j + S[i]) % 256
@@ -150,8 +152,7 @@ def criptografar_mensagem(mensagem, escolha, chave):
     elif escolha == '4':
         return cifra_de_vigenere(mensagem, chave)
     elif escolha == '5':
-        chave_bytes = [ord(c) for c in chave]
-        return rc4(chave_bytes, mensagem)
+        return rc4(chave, mensagem)
     else:
         return mensagem
 
@@ -161,9 +162,8 @@ def receber_mensagens():
         try:
             mensagem = cliente.recv(1024).decode('ascii')
             if escolha == '5':  # RC4
-                # Exibindo as informações detalhadas apenas se a cifra for RC4
-                print(f"Texto Plano: {mensagem}")
-                mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
+                print(f"Texto Plano: {chave}")
+                mensagem_criptografada = criptografar_mensagem(chave, escolha, chave)
                 print(f"Texto Criptografado: {mensagem_criptografada}")
                 print(f"Chave: {chave}")
                 print(f"Chave ASCII: {[ord(c) for c in chave]}")

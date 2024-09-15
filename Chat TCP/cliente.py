@@ -10,11 +10,13 @@ print("4. Cifra de Vigenère")
 print("5. RC4")
 escolha = input("Digite o número da cifra desejada: ")
 
-# Solicitação do texto plano
-texto_plano = input("Digite o texto plano: ")
-
 # Solicitação da chave de criptografia
 chave = input("Digite a chave para a cifra escolhida: ")
+
+# Solicitação do texto plano apenas se RC4 for selecionada
+texto_plano = ""
+if escolha == '5':
+    texto_plano = input("Digite o texto plano: ")
 
 # Função que implementa a Cifra de César
 def cifra_de_cesar(mensagem, chave, criptografar=True):

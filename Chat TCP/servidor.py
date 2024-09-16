@@ -73,7 +73,6 @@ def aceitar_conexoes():
         print(f"Conectado com {str(endereco)}")
 
         # Pedindo o apelido do cliente
-        cliente.send('APELIDO'.encode('ascii'))
         apelido = cliente.recv(1024).decode('ascii')
         apelidos.append(apelido)
         clientes.append(cliente)

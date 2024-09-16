@@ -11,7 +11,7 @@ print("5. RC4")
 escolha = input("Digite o número da cifra desejada: ")
 
 # Solicitação da chave de criptografia
-chave = input("Digite a chave previamente combinada com seu parceiro: ")
+chave = input("Digite a chave:")
 
 # Solicitação do texto plano apenas se RC4 for selecionada
 texto_plano = ""
@@ -107,21 +107,43 @@ def cifra_de_playfair(mensagem, chave, criptografar=True):
     return resultado
 
 # Função que implementa a Cifra de Vigenère
-def cifra_de_vigenere(mensagem, chave, criptografar=True):
-    resultado = ''
-    chave = chave.lower()
-    indice_chave = 0
-    
-    for caractere in mensagem:
+def cifra_de_vigenere(texto, chave, criptografar=True):
+    texto_criptografado = ""
+    tamanho_chave = len(chave)
+
+    for i in range(len(texto)):
+        caractere = texto[i]
         if caractere.isalpha():
-            deslocamento = ord(chave[indice_chave]) - ord('a')
-            deslocamento = deslocamento if criptografar else -deslocamento
-            base = ord('A') if caractere.isupper() else ord('a')
-            resultado += chr((ord(caractere) - base + deslocamento) % 26 + base)
-            indice_chave = (indice_chave + 1) % len(chave)
+            caractere_chave = chave[i % tamanho_chave].upper()
+            deslocamento_chave = ord(caractere_chave) - ord('A')
+
+            if caractere.isupper():
+                texto_criptografado += chr((ord(caractere) + deslocamento_chave - ord('A')) % 26 + ord('A'))
+            else:
+                texto_criptografado += chr((ord(caractere) + deslocamento_chave - ord('a')) % 26 + ord('a'))
         else:
-            resultado += caractere
-    return resultado
+            texto_criptografado += caractere
+
+    return texto_criptografado
+
+def descriptografar(texto_criptografado, chave):
+    texto_descriptografado = ""
+    tamanho_chave = len(chave)
+
+    for i in range(len(texto_criptografado)):
+        caractere = texto_criptografado[i]
+        if caractere.isalpha():
+            caractere_chave = chave[i % tamanho_chave].upper()
+            deslocamento_chave = ord(caractere_chave) - ord('A')
+
+            if caractere.isupper():
+                texto_descriptografado += chr((ord(caractere) - deslocamento_chave - ord('A')) % 26 + ord('A'))
+            else:
+                texto_descriptografado += chr((ord(caractere) - deslocamento_chave - ord('a')) % 26 + ord('a'))
+        else:
+            texto_descriptografado += caractere
+
+    return texto_descriptografado
 
 # Função RC4
 def rc4(key, text):
@@ -189,12 +211,22 @@ def receber_mensagens():
         
 # Função que envia mensagens para o servidor
 def enviar_mensagens():
+    mensagem_mostrada = False
     while True:
         mensagem = '{}: {}'.format(apelido, input(''))
-        mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
-        if escolha == '5':  # RC4
-            print(f"Texto Criptografado a ser enviado: {[ord(c) for c in mensagem_criptografada]}")
-        cliente.send(''.join(mensagem_criptografada).encode('ascii'))
+        
+        # Exibindo informações apenas uma vez
+        if not mensagem_mostrada:
+            texto_plano = mensagem
+            texto_plano_ascii = [ord(c) for c in texto_plano]
+            chave_ascii = [ord(c) for c in chave]
+            print(f"Texto Plano: {texto_plano}")
+            print(f"Texto Plano ASCII: {texto_plano_ascii}")
+            mensagem_criptografada = criptografar_mensagem(mensagem, escolha, chave)
+            print(f"Texto Criptografado: {[ord(c) for c in mensagem_criptografada]}")
+            print(f"Chave: {chave}")
+            print(f"Chave ASCII: {chave_ascii}")
+            mensagem_mostrada = True
         
 def conectar():
     global cliente

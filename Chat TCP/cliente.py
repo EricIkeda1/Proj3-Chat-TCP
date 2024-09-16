@@ -11,7 +11,7 @@ print("5. RC4")
 escolha = input("Digite o número da cifra desejada: ")
 
 # Solicitação da chave de criptografia
-chave = input("Digite a chave para a cifra escolhida: ")
+chave = input("Digite a chave previamente combinada com seu parceiro: ")
 
 # Solicitação do texto plano apenas se RC4 for selecionada
 texto_plano = ""

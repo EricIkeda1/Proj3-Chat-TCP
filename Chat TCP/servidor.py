@@ -94,7 +94,7 @@ def abrir_servidor():
     servidor.bind((bind_ip, bind_port))
     servidor.listen()
 
-    print(f"Servidor iniciado em {bind_ip}:{bind_port}")
+    print(f"Servidor iniciado")
     return servidor
 
 # Função principal para aceitar comandos

@@ -204,13 +204,14 @@ def conectar():
     cliente.connect((target_host, target_port))
     print(f"Conectado ao servidor {target_host} na porta {target_port}")
     print("Aperte Enter para Prosseguir")
-        
+    print("Digite a mensagem:")
+    
 def main():
     conectar()
     while True:
         global comandos
         comandos = cliente.recv(4000).decode()
-        
+            
 # Iniciando o cliente
 apelido = input("Escolha um apelido: ")
 conectar()

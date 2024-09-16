@@ -195,6 +195,10 @@ def enviar_mensagens():
         if escolha == '5':  # RC4
             print(f"Texto Criptografado a ser enviado: {[ord(c) for c in mensagem_criptografada]}")
         cliente.send(''.join(mensagem_criptografada).encode('ascii'))
+        
+# Solicitação do IP do servidor e da porta
+ip_servidor = input("Digite o IP do servidor: ")
+porta_servidor = int(input("Digite a porta do servidor: "))
 
 # Conectando ao servidor
 apelido = input("Escolha seu apelido: ")

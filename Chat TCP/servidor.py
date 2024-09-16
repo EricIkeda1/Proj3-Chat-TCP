@@ -86,7 +86,7 @@ def aceitar_conexoes():
         thread.start()
 
 # Configuração do servidor
-host = '127.0.0.1'
+host = '0.0.0.0'  # Aceita conexões de qualquer IP
 porta = 55555
 
 servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

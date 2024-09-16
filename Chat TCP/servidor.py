@@ -1,5 +1,6 @@
 import socket
 import threading
+from time import sleep
 
 # Função que implementa a Cifra de César
 def cifra_de_cesar(mensagem, chave, criptografar=True):
@@ -84,17 +85,33 @@ def aceitar_conexoes():
         # Criando uma nova thread para gerenciar as mensagens desse cliente
         thread = threading.Thread(target=gerenciar_cliente, args=(cliente,))
         thread.start()
+        
+# Função para iniciar o servidor
+def abrir_servidor():
+    bind_ip = '0.0.0.0'  
+    bind_port = 50000  
 
-# Configuração do servidor
-host = '0.0.0.0'  # Aceita conexões de qualquer IP
-porta = 55555
+    servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    servidor.bind((bind_ip, bind_port))
+    servidor.listen()
 
-servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-servidor.bind((host, porta))
-servidor.listen()
+    print(f"Servidor iniciado em {bind_ip}:{bind_port}")
+    return servidor
 
-clientes = []
-apelidos = []
+# Função principal para aceitar comandos
+def main():
+    while True:
+        comando = input('Digite o comando (exit para sair): ')
+        if comando == 'exit':
+            print("Encerrando o servidor.")
+            break
 
-print("Servidor está ouvindo...")
-aceitar_conexoes()
+# Configurando e iniciando o servidor
+if __name__ == "__main__":
+    servidor = abrir_servidor()
+
+    clientes = []
+    apelidos = []
+
+    print("Servidor está ouvindo...")
+    aceitar_conexoes()

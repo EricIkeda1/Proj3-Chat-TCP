@@ -196,14 +196,23 @@ def enviar_mensagens():
             print(f"Texto Criptografado a ser enviado: {[ord(c) for c in mensagem_criptografada]}")
         cliente.send(''.join(mensagem_criptografada).encode('ascii'))
         
-# Solicitação do IP do servidor e da porta
-ip_servidor = input("Digite o IP do servidor: ")
-porta_servidor = int(input("Digite a porta do servidor: "))
-
-# Conectando ao servidor
-apelido = input("Escolha seu apelido: ")
-cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-cliente.connect(('127.0.0.1', 55555))
+def conectar():
+    global cliente
+    target_host = input("Digite o IP do servidor ao qual deseja se conectar: ")
+    target_port = 50000  # Porta padrão
+    cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cliente.connect((target_host, target_port))
+    print(f"Conectado ao servidor {target_host} na porta {target_port}")
+        
+def main():
+    conectar()
+    while True:
+        global comandos
+        comandos = cliente.recv(4000).decode()
+        
+# Iniciando o cliente
+apelido = input("Escolha um apelido: ")
+conectar()
 
 # Iniciando threads para envio e recebimento de mensagens
 thread_receber = threading.Thread(target=receber_mensagens)

@@ -203,6 +203,7 @@ def conectar():
     cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     cliente.connect((target_host, target_port))
     print(f"Conectado ao servidor {target_host} na porta {target_port}")
+    print("Aperte Enter para Prosseguir")
         
 def main():
     conectar()
